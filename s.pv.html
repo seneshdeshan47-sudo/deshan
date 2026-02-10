@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>S.PV - Photo & Video Share</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f2f5; margin: 0; padding: 0; }
+        header { background-color: #007bff; color: white; padding: 15px; text-align: center; font-size: 24px; font-weight: bold; position: sticky; top: 0; z-index: 100; }
+        
+        .container { max-width: 600px; margin: 20px auto; padding: 10px; }
+        
+        /* Upload Form */
+        .upload-card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        .upload-card h3 { margin-top: 0; color: #333; }
+        input[type="file"] { margin: 10px 0; width: 100%; }
+        button { background-color: #28a745; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; width: 100%; font-size: 16px; }
+        button:hover { background-color: #218838; }
+
+        /* Feed Section */
+        .feed-item { background: white; border-radius: 10px; margin-bottom: 20px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .feed-item img, .feed-item video { width: 100%; display: block; }
+        .feed-item .info { padding: 10px; font-size: 14px; color: #555; }
+    </style>
+</head>
+<body>
+
+<header>S.PV</header>
+
+<div class="container">
+    <div class="upload-card">
+        <h3>අලුත් දෙයක් එක් කරන්න</h3>
+        <input type="file" id="fileInput" accept="image/*,video/*">
+        <p id="error" style="color: red; font-size: 12px; display: none;">වීඩියෝව විනාඩි 1කට වඩා අඩු විය යුතුය!</p>
+        <button onclick="handleUpload()">Upload</button>
+    </div>
+
+    <div id="feed">
+        </div>
+</div>
+
+<script>
+    function handleUpload() {
+        const fileInput = document.getElementById('fileInput');
+        const feed = document.getElementById('feed');
+        const error = document.getElementById('error');
+        const file = fileInput.files[0];
+
+        if (!file) {
+            alert("කරුණාකර ගොනුවක් තෝරන්න!");
+            return;
+        }
+
+        error.style.display = "none";
+
+        // වීඩියෝ කාලය පරීක්ෂා කිරීම (Video Duration Check)
+        if (file.type.startsWith('video/')) {
+            const video = document.createElement('video');
+            video.preload = 'metadata';
+            video.onloadedmetadata = function() {
+                window.URL.revokeObjectURL(video.src);
+                if (video.duration > 60) {
+                    error.style.display = "block";
+                    alert("වීඩියෝව විනාඩි 1කට වඩා වැඩියි!");
+                } else {
+                    addToFeed(file);
+                }
+            }
+            video.src = URL.createObjectURL(file);
+        } else {
+            addToFeed(file);
+        }
+    }
+
+    function addToFeed(file) {
+        const feed = document.getElementById('feed');
+        const item = document.createElement('div');
+        item.className = 'feed-item';
+        
+        const fileURL = URL.createObjectURL(file);
+        
+        if (file.type.startsWith('image/')) {
+            item.innerHTML = `<img src="${fileURL}"><div class="info">ලබාදුන් පින්තූරය</div>`;
+        } else if (file.type.startsWith('video/')) {
+            item.innerHTML = `<video src="${fileURL}" controls></video><div class="info">ලබාදුන් වීඩියෝව</div>`;
+        }
+
+        feed.prepend(item); // අලුත් ඒවා උඩට එන ලෙස
+        document.getElementById('fileInput').value = ""; // Form එක reset කිරීම
+    }
+</script>
+
+</body>
+</html>
